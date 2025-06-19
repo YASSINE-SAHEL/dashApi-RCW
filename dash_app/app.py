@@ -81,7 +81,7 @@ app.layout = html.Div(children=[
 )
 def update_weather(n):
     try:
-        response = requests.get("http://127.0.0.1:8000/info")
+        response = requests.get("https://weather-api-rcw-cwh8fhbkd2b7cxd8.canadaeast-01.azurewebsites.net/info")
         data = response.json()
         return [
             html.P(f"Date : {data['date']}"),
