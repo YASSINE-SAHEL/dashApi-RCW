@@ -1,8 +1,9 @@
 import dash
-from dash import html, dcc, Output, Input
+from dash import html, dcc, Output, Input, State
 import requests
 
 app = dash.Dash(__name__, requests_pathname_prefix='/dashboard/')
+server = app.server
 
 app.layout = html.Div(children=[
 
@@ -15,9 +16,15 @@ app.layout = html.Div(children=[
 
     html.H1(children="Example de Dashboard"),
 
-    # Composant météo (mis à jour automatiquement)
-    html.H2("📡 Données météo actuelles - Casablanca"),
-    dcc.Interval(id='interval-refresh', interval=10*1000, n_intervals=0),
+    # Saisie de la ville
+    html.Div([
+        html.Label("Entrer une ville :"),
+        dcc.Input(id='city-input', type='text', value='Casablanca'),
+        html.Button('Afficher météo', id='refresh-button', n_clicks=0),
+    ], style={'marginTop': '20px'}),
+
+    # Composant météo
+    html.H2("📡 Données météo actuelles"),
     html.Div(id='weather-box', style={
         'padding': '20px',
         'border': '2px solid #ccc',
@@ -77,11 +84,12 @@ app.layout = html.Div(children=[
 
 @app.callback(
     Output('weather-box', 'children'),
-    Input('interval-refresh', 'n_intervals')
+    Input('refresh-button', 'n_clicks'),
+    State('city-input', 'value')
 )
-def update_weather(n):
+def update_weather(n_clicks, city):
     try:
-        response = requests.get("https://weather-api-rcw-cwh8fhbkd2b7cxd8.canadaeast-01.azurewebsites.net/info")
+        response = requests.get(f"https://weather-api-rcw-cwh8fhbkd2b7cxd8.canadaeast-01.azurewebsites.net/info?city={city}")
         data = response.json()
         return [
             html.P(f"Date : {data['date']}"),
@@ -93,4 +101,3 @@ def update_weather(n):
     except Exception as e:
         return html.P("Erreur lors de la récupération des données météo.")
 
-server = app.server
